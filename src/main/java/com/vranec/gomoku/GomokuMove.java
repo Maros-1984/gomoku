@@ -1,16 +1,27 @@
 package com.vranec.gomoku;
 
-import com.vranec.minimax.Move;
+import com.vranec.minimax.Color;
 
-public class GomokuMove implements Move {
+public class GomokuMove {
+    private final Color color;
+    private final int x;
+    private final int y;
 
     public GomokuMove(String moveString) {
-        // TODO Auto-generated constructor stub
+        this.color = Color.HUMAN;
+        y = moveString.charAt(0) - 'a';
+        x = moveString.charAt(1) - '1';
     }
 
-    public void display() {
-        // TODO Auto-generated method stub
-        
+    public Color getColor() {
+        return color;
     }
 
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
 }

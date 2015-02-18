@@ -11,7 +11,7 @@ import com.vranec.minimax.Color;
  */
 public class App {
     private final ArtificialIntelligence ai = new ArtificialIntelligence();
-    private GomokuBoard board = new GomokuBoard();
+    private GomokuBoard board = new GomokuBoard(9, 9);
     Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -24,10 +24,9 @@ public class App {
             System.out.print("Your move: ");
             String moveString = input.nextLine();
             GomokuMove move = new GomokuMove(moveString);
-            board.perform(move);
+            board = new GomokuBoard(board, move);
             board.display();
-            GomokuMove bestComputerMove = (GomokuMove) ai.negamax(board, 10, Color.BLACK).getMove();
-            bestComputerMove.display();
+            board = (GomokuBoard) ai.negamax(board, 10, Color.COMPUTER).getBestBoard();
         }
         System.out.println("Game over.");
     }
