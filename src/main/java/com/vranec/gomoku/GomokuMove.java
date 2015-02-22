@@ -8,9 +8,13 @@ public class GomokuMove {
     private final int y;
 
     public GomokuMove(String moveString) {
-        this.color = Color.HUMAN;
-        y = moveString.charAt(0) - 'a';
-        x = moveString.charAt(1) - '1';
+        this(moveString.charAt(1) - '1', moveString.charAt(0) - 'a', Color.HUMAN);
+    }
+
+    public GomokuMove(int x, int y, Color color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
     }
 
     public Color getColor() {

@@ -1,5 +1,11 @@
 package com.vranec.gomoku;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Iterator;
+
 import com.vranec.minimax.Board;
 import com.vranec.minimax.Color;
 
@@ -21,6 +27,14 @@ public class GomokuBoard implements Board {
             }
         }
         board[move.getX()][move.getY()] = move.getColor();
+        int maxLength = getMoveLength(move);
+
+        this.maxLineComputer = move.getColor() == Color.HUMAN ? from.maxLineComputer : Math
+                .max(maxLength, from.maxLineComputer);
+        this.maxLineHuman = move.getColor() == Color.COMPUTER ? from.maxLineHuman : Math.max(maxLength, from.maxLineHuman);
+    }
+
+    private int getMoveLength(GomokuMove move) {
         int maxLength = 0;
         for (Direction direction : Direction.values()) {
             int x = move.getX();
@@ -42,10 +56,39 @@ public class GomokuBoard implements Board {
                 maxLength = length;
             }
         }
+        return maxLength;
+    }
 
-        this.maxLineComputer = move.getColor() == Color.HUMAN ? from.maxLineComputer : Math
-                .max(maxLength, from.maxLineComputer);
-        this.maxLineHuman = move.getColor() == Color.COMPUTER ? from.maxLineHuman : Math.max(maxLength, from.maxLineHuman);
+    public GomokuBoard(int width, int height, String... lines) {
+        board = new Color[width][height];
+
+        int maxLineComputer = 0;
+        int maxLineHuman = 0;
+        for (int y = 0; y < lines.length; y++) {
+            for (int x = 0; x < lines[y].length(); x++) {
+                switch (lines[y].charAt(x)) {
+                case 'o':
+                case 'O':
+                case 'h':
+                case 'H':
+                    board[x][y] = Color.HUMAN;
+                    maxLineHuman = Math.max(maxLineHuman, getMoveLength(new GomokuMove(x, y, Color.HUMAN)));
+                    break;
+                case 'x':
+                case 'X':
+                    board[x][y] = Color.COMPUTER;
+                    maxLineComputer = Math.max(maxLineComputer, getMoveLength(new GomokuMove(x, y, Color.COMPUTER)));
+                    break;
+                case ' ':
+                    break;
+                default:
+                    throw new IllegalArgumentException();
+                }
+            }
+        }
+
+        this.maxLineComputer = maxLineComputer;
+        this.maxLineHuman = maxLineHuman;
     }
 
     private boolean insideBoard(int x, int y) {
@@ -53,7 +96,7 @@ public class GomokuBoard implements Board {
     }
 
     public boolean isGameOver() {
-        return false;
+        return maxLineComputer >= 5 || maxLineComputer >= 5;
     }
 
     public int getWidth() {
@@ -65,31 +108,56 @@ public class GomokuBoard implements Board {
     }
 
     public int getBoardValue(Color color) {
-
         switch (color) {
         case COMPUTER:
-            return maxLineComputer;
+            return -getHumanBoardValue();
         case HUMAN:
-            return maxLineHuman;
+            return getHumanBoardValue();
         default:
             throw new IllegalStateException();
         }
     }
 
-    public void display() {
-        for (int x = 0; x < getWidth(); x++) {
-            System.out.print(' ');
-            System.out.print(x + 1);
+    private int getHumanBoardValue() {
+        if (maxLineHuman == 5) {
+            return Integer.MAX_VALUE;
         }
-        System.out.println();
+        if (maxLineComputer == 5) {
+            return -Integer.MAX_VALUE;
+        }
+        return maxLineHuman - maxLineComputer;
+    }
+
+    @Override
+    public String toString() {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(stream);
+        output(out);
+        try {
+            return stream.toString("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return super.toString();
+        }
+    }
+
+    private void output(PrintStream out) {
+        out.print(' ');
+        for (int x = 0; x < getWidth(); x++) {
+            out.print(x + 1);
+        }
+        out.println();
 
         for (int y = 0; y < getHeight(); y++) {
-            System.out.print((char) ('a' + y));
+            out.print((char) ('a' + y));
             for (int x = 0; x < getWidth(); x++) {
-                System.out.print(display(board[x][y]));
+                out.print(display(board[x][y]));
             }
-            System.out.println();
+            out.println();
         }
+    }
+
+    public void display() {
+        output(System.out);
     }
 
     private String display(Color color) {
@@ -106,9 +174,61 @@ public class GomokuBoard implements Board {
         }
     }
 
-    public Iterable<Board> getNextBoards(Color color) {
-        // TODO Auto-generated method stub
-        return null;
+    public Iterable<Board> getNextBoards(final Color color) {
+        return new Iterable<Board>() {
+            public Iterator<Board> iterator() {
+                return new Iterator<Board>() {
+                    private int currentX = -1;
+                    private int currentY = 0;
+
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
+
+                    public Board next() {
+                        return new GomokuBoard(GomokuBoard.this, new GomokuMove(currentX, currentY, color));
+                    }
+
+                    public boolean hasNext() {
+                        currentX++;
+                        if (currentX >= getWidth()) {
+                            currentX = 0;
+                            currentY++;
+                        }
+                        for (; currentY < getHeight(); currentY++) {
+                            for (; currentX < getWidth(); currentX++) {
+                                if (board[currentX][currentY] == null) {
+                                    return true;
+                                }
+                            }
+                            currentX = 0;
+                        }
+                        return false;
+                    }
+                };
+            }
+        };
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(board);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        GomokuBoard other = (GomokuBoard) obj;
+        if (!Arrays.deepEquals(board, other.board))
+            return false;
+        return true;
+    }
 }
