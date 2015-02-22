@@ -13,13 +13,16 @@ public class GomokuBoard implements Board {
     private final Color[][] board;
     private final int maxLineHuman;
     private final int maxLineComputer;
+    private final int hashCode;
 
     public GomokuBoard(int width, int height) {
         board = new Color[width][height];
         maxLineComputer = maxLineHuman = 0;
+        hashCode = 1;
     }
 
     public GomokuBoard(GomokuBoard from, GomokuMove move) {
+        hashCode = from.hashCode + move.hashCode();
         board = new Color[from.getWidth()][from.getHeight()];
         for (int x = 0; x < getWidth(); x++) {
             for (int y = 0; y < getHeight(); y++) {
@@ -60,6 +63,7 @@ public class GomokuBoard implements Board {
     }
 
     public GomokuBoard(int width, int height, String... lines) {
+        hashCode = 1;
         board = new Color[width][height];
 
         int maxLineComputer = 0;

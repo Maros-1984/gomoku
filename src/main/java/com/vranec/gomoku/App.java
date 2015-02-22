@@ -26,7 +26,7 @@ public class App {
             GomokuMove move = new GomokuMove(moveString);
             board = new GomokuBoard(board, move);
             board.display();
-            board = (GomokuBoard) ai.negamax(board, 4, Color.COMPUTER).getBestBoard();
+            board = (GomokuBoard) ai.getBestMove(board, 4, Color.COMPUTER).getBestBoard();
         }
         System.out.println("Game over.");
     }

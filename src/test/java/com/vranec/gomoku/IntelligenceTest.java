@@ -16,26 +16,26 @@ public class IntelligenceTest {
 
     @Test
     public void testGameOverInOne() {
-        Assert.assertEquals(new GomokuBoard(9, 9, "    HHHHH"), ai.negamax(BOARD_GAME_OVER_IN_ONE_, 1, Color.HUMAN)
+        Assert.assertEquals(new GomokuBoard(9, 9, "    HHHHH"), ai.getBestMove(BOARD_GAME_OVER_IN_ONE_, 1, Color.HUMAN)
                 .getBestBoard());
     }
 
     @Test
     public void testGameOverInTwo() {
-        Assert.assertEquals(new GomokuBoard(9, 9, "    HHHH "), ai.negamax(BOARD_GAME_OVER_IN_TWO_, 3, Color.HUMAN)
+        Assert.assertEquals(new GomokuBoard(9, 9, "    HHHH "), ai.getBestMove(BOARD_GAME_OVER_IN_TWO_, 3, Color.HUMAN)
                 .getBestBoard());
     }
 
     @Test
     public void testGameOverInTwo2() {
-        BestMove result = ai.negamax(BOARD_GAME_OVER_IN_TWO_2, 5, Color.COMPUTER);
+        BestMove result = ai.getBestMove(BOARD_GAME_OVER_IN_TWO_2, 5, Color.COMPUTER);
         Assert.assertEquals(Integer.MAX_VALUE, result.getValue());
         Assert.assertEquals(new GomokuBoard(9, 9, "X       X", " X     X", "  X   X", "", "    X"), result.getBestBoard());
     }
 
     @Test
     public void testPreventGameOverInTwo() {
-        BestMove result = ai.negamax(BOARD_GAME_OVER_IN_TWO_2, 4, Color.HUMAN);
+        BestMove result = ai.getBestMove(BOARD_GAME_OVER_IN_TWO_2, 4, Color.HUMAN);
         Assert.assertEquals(new GomokuBoard(9, 9, "X       X", " X     X", "  X   X", "   H"), result.getBestBoard());
     }
 }
