@@ -3,7 +3,6 @@ package com.vranec.gomoku;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Iterator;
 
 import com.vranec.minimax.Board;
@@ -18,11 +17,11 @@ public class GomokuBoard implements Board {
     public GomokuBoard(int width, int height) {
         board = new Color[width][height];
         maxLineComputer = maxLineHuman = 0;
-        hashCode = 1;
+        hashCode = 0;
     }
 
     public GomokuBoard(GomokuBoard from, GomokuMove move) {
-        hashCode = from.hashCode + move.hashCode();
+        hashCode = from.hashCode ^ move.hashCode();
         board = new Color[from.getWidth()][from.getHeight()];
         for (int x = 0; x < getWidth(); x++) {
             for (int y = 0; y < getHeight(); y++) {
@@ -63,7 +62,7 @@ public class GomokuBoard implements Board {
     }
 
     public GomokuBoard(int width, int height, String... lines) {
-        hashCode = 1;
+        int hashCode = 0;
         board = new Color[width][height];
 
         int maxLineComputer = 0;
@@ -76,12 +75,16 @@ public class GomokuBoard implements Board {
                 case 'h':
                 case 'H':
                     board[x][y] = Color.HUMAN;
-                    maxLineHuman = Math.max(maxLineHuman, getMoveLength(new GomokuMove(x, y, Color.HUMAN)));
+                    GomokuMove move = new GomokuMove(x, y, Color.HUMAN);
+                    hashCode ^= move.hashCode();
+                    maxLineHuman = Math.max(maxLineHuman, getMoveLength(move));
                     break;
                 case 'x':
                 case 'X':
                     board[x][y] = Color.COMPUTER;
-                    maxLineComputer = Math.max(maxLineComputer, getMoveLength(new GomokuMove(x, y, Color.COMPUTER)));
+                    GomokuMove move2 = new GomokuMove(x, y, Color.COMPUTER);
+                    hashCode ^= move2.hashCode();
+                    maxLineComputer = Math.max(maxLineComputer, getMoveLength(move2));
                     break;
                 case ' ':
                     break;
@@ -93,6 +96,7 @@ public class GomokuBoard implements Board {
 
         this.maxLineComputer = maxLineComputer;
         this.maxLineHuman = maxLineHuman;
+        this.hashCode = hashCode;
     }
 
     private boolean insideBoard(int x, int y) {
@@ -218,7 +222,7 @@ public class GomokuBoard implements Board {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + Arrays.hashCode(board);
+        result = prime * result + hashCode;
         return result;
     }
 
@@ -231,7 +235,7 @@ public class GomokuBoard implements Board {
         if (getClass() != obj.getClass())
             return false;
         GomokuBoard other = (GomokuBoard) obj;
-        if (!Arrays.deepEquals(board, other.board))
+        if (hashCode != other.hashCode)
             return false;
         return true;
     }
