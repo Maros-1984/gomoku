@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import com.vranec.minimax.Board;
 import com.vranec.minimax.Color;
@@ -13,6 +15,7 @@ public class GomokuBoard implements Board {
     private final int maxLineHuman;
     private final int maxLineComputer;
     private final int hashCode;
+    private final Set<Position> possibleMoves = new LinkedHashSet<Position>();
 
     public GomokuBoard(int width, int height) {
         board = new Color[width][height];
@@ -28,12 +31,34 @@ public class GomokuBoard implements Board {
                 board[x][y] = from.board[x][y];
             }
         }
+        if (board[move.getX()][move.getY()] != null) {
+            throw new IllegalAccessError();
+        }
         board[move.getX()][move.getY()] = move.getColor();
         int maxLength = getMoveLength(move);
 
         this.maxLineComputer = move.getColor() == Color.HUMAN ? from.maxLineComputer : Math
                 .max(maxLength, from.maxLineComputer);
         this.maxLineHuman = move.getColor() == Color.COMPUTER ? from.maxLineHuman : Math.max(maxLength, from.maxLineHuman);
+
+        updatePossibleMoves(from.possibleMoves, move);
+    }
+
+    private void updatePossibleMoves(Set<Position> fromPossibleMoves, GomokuMove move) {
+        possibleMoves.addAll(fromPossibleMoves);
+        possibleMoves.remove(new Position(move.getX(), move.getY()));
+        for (Direction direction : Direction.values()) {
+            int x = direction.applyToX(move.getX());
+            int y = direction.applyToY(move.getY());
+            if (insideBoard(x, y) && board[x][y] == null) {
+                possibleMoves.add(new Position(x, y));
+            }
+            x = direction.applyToX(x);
+            y = direction.applyToY(y);
+            if (insideBoard(x, y) && board[x][y] == null) {
+                possibleMoves.add(new Position(x, y));
+            }
+        }
     }
 
     private int getMoveLength(GomokuMove move) {
@@ -77,6 +102,7 @@ public class GomokuBoard implements Board {
                     board[x][y] = Color.HUMAN;
                     GomokuMove move = new GomokuMove(x, y, Color.HUMAN);
                     hashCode ^= move.hashCode();
+                    updatePossibleMoves(possibleMoves, move);
                     maxLineHuman = Math.max(maxLineHuman, getMoveLength(move));
                     break;
                 case 'x':
@@ -84,6 +110,7 @@ public class GomokuBoard implements Board {
                     board[x][y] = Color.COMPUTER;
                     GomokuMove move2 = new GomokuMove(x, y, Color.COMPUTER);
                     hashCode ^= move2.hashCode();
+                    updatePossibleMoves(possibleMoves, move2);
                     maxLineComputer = Math.max(maxLineComputer, getMoveLength(move2));
                     break;
                 case ' ':
@@ -186,32 +213,19 @@ public class GomokuBoard implements Board {
         return new Iterable<Board>() {
             public Iterator<Board> iterator() {
                 return new Iterator<Board>() {
-                    private int currentX = -1;
-                    private int currentY = 0;
+                    private final Iterator<Position> iterator = GomokuBoard.this.possibleMoves.iterator();
 
                     public void remove() {
                         throw new UnsupportedOperationException();
                     }
 
                     public Board next() {
-                        return new GomokuBoard(GomokuBoard.this, new GomokuMove(currentX, currentY, color));
+                        Position position = iterator.next();
+                        return new GomokuBoard(GomokuBoard.this, new GomokuMove(position.getX(), position.getY(), color));
                     }
 
                     public boolean hasNext() {
-                        currentX++;
-                        if (currentX >= getWidth()) {
-                            currentX = 0;
-                            currentY++;
-                        }
-                        for (; currentY < getHeight(); currentY++) {
-                            for (; currentX < getWidth(); currentX++) {
-                                if (board[currentX][currentY] == null) {
-                                    return true;
-                                }
-                            }
-                            currentX = 0;
-                        }
-                        return false;
+                        return iterator.hasNext();
                     }
                 };
             }
