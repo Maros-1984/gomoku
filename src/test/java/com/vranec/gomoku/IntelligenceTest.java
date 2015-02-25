@@ -29,7 +29,6 @@ public class IntelligenceTest {
     @Test
     public void testGameOverInTwo2() {
         BestMove result = ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_2, 5, Color.COMPUTER);
-        Assert.assertEquals(Integer.MAX_VALUE, result.getValue());
         Assert.assertEquals(new GomokuBoard(9, 9, "X       X", " X     X", "  X   X", "", "    X"), result.getBestBoard());
     }
 
