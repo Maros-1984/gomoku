@@ -25,7 +25,7 @@ public class App {
             System.out.print("Your move: ");
             String moveString = input.nextLine();
             GomokuMove move = new GomokuMove(moveString);
-            board = new GomokuBoard(board, move);
+            board = (GomokuBoard) board.apply(move);
             board.display();
             board = (GomokuBoard) ai.getBestMoveTimedIterativeDeepeningTimed(board, 100, Color.COMPUTER,
                     new Date().getTime() + 1000 * 5).getBestBoard();
