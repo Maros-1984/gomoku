@@ -1,5 +1,6 @@
 package com.vranec.gomoku;
 
+import java.util.Date;
 import java.util.Scanner;
 
 import com.vranec.minimax.ArtificialIntelligence;
@@ -26,7 +27,8 @@ public class App {
             GomokuMove move = new GomokuMove(moveString);
             board = new GomokuBoard(board, move);
             board.display();
-            board = (GomokuBoard) ai.getBestMove(board, 4, Color.COMPUTER).getBestBoard();
+            board = (GomokuBoard) ai.getBestMoveTimedIterativeDeepeningTimed(board, 100, Color.COMPUTER,
+                    new Date().getTime() + 1000 * 5).getBestBoard();
         }
         System.out.println("Game over.");
     }

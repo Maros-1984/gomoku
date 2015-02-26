@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.junit.runner.Computer;
+
 import com.vranec.minimax.Board;
 import com.vranec.minimax.Color;
 
@@ -14,6 +16,12 @@ public class GomokuBoard implements Board {
     private final Color[][] board;
     private final int maxLineHuman;
     private final int maxLineComputer;
+    private final int humanTotalX;
+    private final int humanTotalY;
+    private final int humanTotalCount;
+    private final int computerTotalX;
+    private final int computerTotalY;
+    private final int computerTotalCount;
     private final int hashCode;
     private final Set<Position> possibleMoves = new LinkedHashSet<Position>();
 
@@ -21,6 +29,8 @@ public class GomokuBoard implements Board {
         board = new Color[width][height];
         maxLineComputer = maxLineHuman = 0;
         hashCode = 0;
+        humanTotalCount = humanTotalX = humanTotalY = 0;
+        computerTotalCount = computerTotalX = computerTotalY = 0;
     }
 
     public GomokuBoard(GomokuBoard from, GomokuMove move) {
@@ -42,6 +52,22 @@ public class GomokuBoard implements Board {
         this.maxLineHuman = move.getColor() == Color.COMPUTER ? from.maxLineHuman : Math.max(maxLength, from.maxLineHuman);
 
         updatePossibleMoves(from.possibleMoves, move);
+
+        if (move.getColor() == Color.HUMAN) {
+            humanTotalCount = from.humanTotalCount + 1;
+            humanTotalX = from.humanTotalX + move.getX();
+            humanTotalY = from.humanTotalY + move.getY();
+            computerTotalCount = from.computerTotalCount;
+            computerTotalX = from.computerTotalX;
+            computerTotalY = from.computerTotalY;
+        } else {
+            computerTotalCount = from.computerTotalCount + 1;
+            computerTotalX = from.computerTotalX + move.getX();
+            computerTotalY = from.computerTotalY + move.getY();
+            humanTotalCount = from.humanTotalCount;
+            humanTotalX = from.humanTotalX;
+            humanTotalY = from.humanTotalY;
+        }
     }
 
     private void updatePossibleMoves(Set<Position> fromPossibleMoves, GomokuMove move) {
@@ -87,7 +113,7 @@ public class GomokuBoard implements Board {
     }
 
     public GomokuBoard(int width, int height, String... lines) {
-        int hashCode = 0;
+        int hashCode = 0, humanTotalCount = 0, computerTotalCount = 0, humanTotalX = 0, humanTotalY = 0, computerTotalX = 0, computerTotalY = 0;
         board = new Color[width][height];
 
         int maxLineComputer = 0;
@@ -104,6 +130,9 @@ public class GomokuBoard implements Board {
                     hashCode ^= move.hashCode();
                     updatePossibleMoves(possibleMoves, move);
                     maxLineHuman = Math.max(maxLineHuman, getMoveLength(move));
+                    humanTotalCount++;
+                    humanTotalX += x;
+                    humanTotalY += y;
                     break;
                 case 'x':
                 case 'X':
@@ -112,6 +141,9 @@ public class GomokuBoard implements Board {
                     hashCode ^= move2.hashCode();
                     updatePossibleMoves(possibleMoves, move2);
                     maxLineComputer = Math.max(maxLineComputer, getMoveLength(move2));
+                    computerTotalCount++;
+                    computerTotalX += x;
+                    computerTotalY += y;
                     break;
                 case ' ':
                     break;
@@ -124,6 +156,12 @@ public class GomokuBoard implements Board {
         this.maxLineComputer = maxLineComputer;
         this.maxLineHuman = maxLineHuman;
         this.hashCode = hashCode;
+        this.humanTotalCount = humanTotalCount;
+        this.humanTotalX = humanTotalX;
+        this.humanTotalY = humanTotalY;
+        this.computerTotalCount = computerTotalCount;
+        this.computerTotalX = computerTotalX;
+        this.computerTotalY = computerTotalY;
     }
 
     private boolean insideBoard(int x, int y) {
@@ -160,7 +198,20 @@ public class GomokuBoard implements Board {
         if (maxLineComputer == 5) {
             return -Integer.MAX_VALUE;
         }
-        return maxLineHuman - maxLineComputer;
+        int middleX = board.length / 2;
+        int middleY = board[0].length / 2;
+        int humanDistanceFromMiddle2 = 0;
+        if (humanTotalCount > 0) {
+            humanDistanceFromMiddle2 = (middleX - humanTotalX / humanTotalCount) * (middleX - humanTotalX / humanTotalCount)
+                    + (middleY - humanTotalY / humanTotalCount) * (middleY - humanTotalY / humanTotalCount);
+        }
+        int computerDistanceFromMiddle2 = 0;
+        if (computerTotalCount > 0) {
+            computerDistanceFromMiddle2 = (middleX - computerTotalX / computerTotalCount)
+                    * (middleX - computerTotalX / computerTotalCount) + (middleY - computerTotalY / computerTotalCount)
+                    * (middleY - computerTotalY / computerTotalCount);
+        }
+        return computerDistanceFromMiddle2 - humanDistanceFromMiddle2;
     }
 
     @Override
