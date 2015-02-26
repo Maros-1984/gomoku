@@ -3,8 +3,9 @@ package com.vranec.gomoku;
 import java.util.Random;
 
 import com.vranec.minimax.Color;
+import com.vranec.minimax.Move;
 
-public class GomokuMove extends Position {
+public class GomokuMove extends Position implements Move {
     private static final int[][] HUMAN_HASH = new int[100][100];
     private static final int[][] COMPUTER_HASH = new int[100][100];
 

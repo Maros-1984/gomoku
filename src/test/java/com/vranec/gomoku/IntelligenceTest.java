@@ -37,4 +37,12 @@ public class IntelligenceTest {
         BestMove result = ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_2, 4, Color.HUMAN);
         Assert.assertEquals(new GomokuBoard(9, 9, "X       X", " X     X", "  X   X", "", "    H"), result.getBestBoard());
     }
+
+    @Test
+    public void testPerformance() {
+        long start = System.currentTimeMillis();
+        int depth = 10;
+        ai.getBestMoveIterativeDeepening(new GomokuBoard(50, 50), depth, Color.HUMAN);
+        System.out.println("Searched in depth " + depth + " for " + ((System.currentTimeMillis() - start) / 1000) + "s.");
+    }
 }
