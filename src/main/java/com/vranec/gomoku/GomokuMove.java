@@ -54,4 +54,10 @@ public class GomokuMove extends Position implements Move {
             return false;
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "[" + getX() + "," + getY() + "]";
+    }
+
 }

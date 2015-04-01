@@ -3,8 +3,11 @@ package com.vranec.gomoku;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.vranec.minimax.Board;
@@ -13,83 +16,21 @@ import com.vranec.minimax.Move;
 
 public class GomokuBoard implements Board {
     private final Color[][] board;
-    private final int maxLineHuman;
-    private final int maxLineComputer;
-    private final int humanTotalX;
-    private final int humanTotalY;
-    private final int humanTotalCount;
-    private final int computerTotalX;
-    private final int computerTotalY;
-    private final int computerTotalCount;
-    private final int hashCode;
-    private final Set<Position> possibleMoves = new LinkedHashSet<Position>();
+    private int maxLineHuman;
+    private int maxLineComputer;
+    private int humanTotalX;
+    private int humanTotalY;
+    private int humanTotalCount;
+    private int computerTotalX;
+    private int computerTotalY;
+    private int computerTotalCount;
+    private final Set<GomokuMove> movesSoFar = new HashSet<GomokuMove>();
 
     public GomokuBoard(int width, int height) {
         board = new Color[width][height];
         maxLineComputer = maxLineHuman = 0;
-        hashCode = 0;
         humanTotalCount = humanTotalX = humanTotalY = 0;
         computerTotalCount = computerTotalX = computerTotalY = 0;
-        possibleMoves.add(new Position(width / 2, height / 2));
-    }
-
-    public GomokuBoard(GomokuBoard from, GomokuMove move) {
-        hashCode = from.hashCode ^ move.hashCode();
-        board = allocateBoardMemory(from);
-        fillBoardWithData(from, move);
-        int maxLength = getMoveLength(move);
-
-        this.maxLineComputer = move.getColor() == Color.HUMAN ? from.maxLineComputer : Math
-                .max(maxLength, from.maxLineComputer);
-        this.maxLineHuman = move.getColor() == Color.COMPUTER ? from.maxLineHuman : Math.max(maxLength, from.maxLineHuman);
-
-        updatePossibleMoves(from.possibleMoves, move);
-
-        if (move.getColor() == Color.HUMAN) {
-            humanTotalCount = from.humanTotalCount + 1;
-            humanTotalX = from.humanTotalX + move.getX();
-            humanTotalY = from.humanTotalY + move.getY();
-            computerTotalCount = from.computerTotalCount;
-            computerTotalX = from.computerTotalX;
-            computerTotalY = from.computerTotalY;
-        } else {
-            computerTotalCount = from.computerTotalCount + 1;
-            computerTotalX = from.computerTotalX + move.getX();
-            computerTotalY = from.computerTotalY + move.getY();
-            humanTotalCount = from.humanTotalCount;
-            humanTotalX = from.humanTotalX;
-            humanTotalY = from.humanTotalY;
-        }
-    }
-
-    private void fillBoardWithData(GomokuBoard from, GomokuMove move) {
-        for (int x = 0; x < getWidth(); x++) {
-            for (int y = 0; y < getHeight(); y++) {
-                board[x][y] = from.board[x][y];
-            }
-        }
-        board[move.getX()][move.getY()] = move.getColor();
-    }
-
-    private Color[][] allocateBoardMemory(GomokuBoard from) {
-        return new Color[from.getWidth()][from.getHeight()];
-    }
-
-    private void updatePossibleMoves(Set<Position> fromPossibleMoves, GomokuMove move) {
-        possibleMoves.addAll(fromPossibleMoves);
-        possibleMoves.remove(new Position(move.getX(), move.getY()));
-        for (Direction direction : Direction.values()) {
-            int x = direction.applyToX(move.getX());
-            int y = direction.applyToY(move.getY());
-            if (insideBoard(x, y) && board[x][y] == null) {
-                possibleMoves.add(new Position(x, y));
-            }
-            x = direction.applyToX(x);
-            y = direction.applyToY(y);
-            if (insideBoard(x, y) && board[x][y] == null) {
-                possibleMoves.add(new Position(x, y));
-            }
-        }
     }
 
     private int getMoveLength(GomokuMove move) {
@@ -118,7 +59,7 @@ public class GomokuBoard implements Board {
     }
 
     public GomokuBoard(int width, int height, String... lines) {
-        int hashCode = 0, humanTotalCount = 0, computerTotalCount = 0, humanTotalX = 0, humanTotalY = 0, computerTotalX = 0, computerTotalY = 0;
+        int humanTotalCount = 0, computerTotalCount = 0, humanTotalX = 0, humanTotalY = 0, computerTotalX = 0, computerTotalY = 0;
         board = new Color[width][height];
 
         int maxLineComputer = 0;
@@ -132,8 +73,6 @@ public class GomokuBoard implements Board {
                 case 'H':
                     board[x][y] = Color.HUMAN;
                     GomokuMove move = new GomokuMove(x, y, Color.HUMAN);
-                    hashCode ^= move.hashCode();
-                    updatePossibleMoves(possibleMoves, move);
                     maxLineHuman = Math.max(maxLineHuman, getMoveLength(move));
                     humanTotalCount++;
                     humanTotalX += x;
@@ -143,8 +82,6 @@ public class GomokuBoard implements Board {
                 case 'X':
                     board[x][y] = Color.COMPUTER;
                     GomokuMove move2 = new GomokuMove(x, y, Color.COMPUTER);
-                    hashCode ^= move2.hashCode();
-                    updatePossibleMoves(possibleMoves, move2);
                     maxLineComputer = Math.max(maxLineComputer, getMoveLength(move2));
                     computerTotalCount++;
                     computerTotalX += x;
@@ -160,7 +97,6 @@ public class GomokuBoard implements Board {
 
         this.maxLineComputer = maxLineComputer;
         this.maxLineHuman = maxLineHuman;
-        this.hashCode = hashCode;
         this.humanTotalCount = humanTotalCount;
         this.humanTotalX = humanTotalX;
         this.humanTotalY = humanTotalY;
@@ -266,33 +202,79 @@ public class GomokuBoard implements Board {
     }
 
     public Iterable<Move> getNextBoards(final Color color) {
-        return new Iterable<Move>() {
-            public Iterator<Move> iterator() {
-                return new Iterator<Move>() {
-                    private final Iterator<Position> iterator = GomokuBoard.this.possibleMoves.iterator();
+        Set<Move> possibleMoves = new LinkedHashSet<Move>();
+        if (board[board.length / 2][board[0].length / 2] == null) {
+            possibleMoves.add(new GomokuMove(board.length / 2, board[0].length / 2, color));
+        }
 
-                    public void remove() {
-                        throw new UnsupportedOperationException();
+        for (int xx = 0; xx < board.length; xx++) {
+            for (int yy = 0; yy < board[0].length; yy++) {
+                if (board[xx][yy] == null) {
+                    continue;
+                }
+                for (Direction direction : Direction.values()) {
+                    int x = direction.applyToX(xx);
+                    int y = direction.applyToY(yy);
+                    if (insideBoard(x, y) && board[x][y] == null) {
+                        possibleMoves.add(new GomokuMove(x, y, color));
                     }
+                    x = direction.applyToX(x);
+                    y = direction.applyToY(y);
+                    if (insideBoard(x, y) && board[x][y] == null) {
+                        possibleMoves.add(new GomokuMove(x, y, color));
+                    }
+                }
 
-                    public Move next() {
-                        Position position = iterator.next();
-                        return new GomokuMove(position.getX(), position.getY(), color);
-                    }
-
-                    public boolean hasNext() {
-                        return iterator.hasNext();
-                    }
-                };
             }
-        };
+        }
+
+        return possibleMoves;
+    }
+
+    public Board apply(Move rawMove) {
+        GomokuMove move = (GomokuMove) rawMove;
+        board[move.getX()][move.getY()] = move.getColor();
+        int maxLength = getMoveLength(move);
+
+        this.maxLineComputer = move.getColor() == Color.HUMAN ? 0 : maxLength;
+        this.maxLineHuman = move.getColor() == Color.HUMAN ? maxLength : 0;
+
+        if (move.getColor() == Color.HUMAN) {
+            humanTotalCount++;
+            humanTotalX += move.getX();
+            humanTotalY += move.getY();
+        } else {
+            computerTotalCount++;
+            computerTotalX += move.getX();
+            computerTotalY += move.getY();
+        }
+
+        movesSoFar.add(move);
+
+        return this;
+    }
+
+    public void undo(Move rawMove) {
+        GomokuMove move = (GomokuMove) rawMove;
+        board[move.getX()][move.getY()] = null;
+        maxLineComputer = maxLineHuman = 0;
+        if (move.getColor() == Color.HUMAN) {
+            humanTotalCount--;
+            humanTotalX -= move.getX();
+            humanTotalY -= move.getY();
+        } else {
+            computerTotalCount--;
+            computerTotalX -= move.getX();
+            computerTotalY -= move.getY();
+        }
+        movesSoFar.remove(move);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + hashCode;
+        result = prime * result + ((movesSoFar == null) ? 0 : movesSoFar.hashCode());
         return result;
     }
 
@@ -305,15 +287,11 @@ public class GomokuBoard implements Board {
         if (getClass() != obj.getClass())
             return false;
         GomokuBoard other = (GomokuBoard) obj;
-        if (hashCode != other.hashCode)
+        if (movesSoFar == null) {
+            if (other.movesSoFar != null)
+                return false;
+        } else if (!movesSoFar.equals(other.movesSoFar))
             return false;
         return true;
-    }
-
-    public Board apply(Move move) {
-        return new GomokuBoard(this, (GomokuMove) move);
-    }
-
-    public void undo(Move move) {
     }
 }

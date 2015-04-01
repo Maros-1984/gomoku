@@ -27,8 +27,8 @@ public class App {
             GomokuMove move = new GomokuMove(moveString);
             board = (GomokuBoard) board.apply(move);
             board.display();
-            board = (GomokuBoard) ai.getBestMoveTimedIterativeDeepeningTimed(board, 100, Color.COMPUTER,
-                    new Date().getTime() + 1000 * 5).getBestBoard();
+            board = (GomokuBoard) board.apply(ai.getBestMoveTimedIterativeDeepeningTimed(board, 100, Color.COMPUTER,
+                    new Date().getTime() + 1000 * 5).getMove());
         }
         System.out.println("Game over.");
     }

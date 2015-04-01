@@ -16,26 +16,26 @@ public class IntelligenceTest {
 
     @Test
     public void testGameOverInOne() {
-        Assert.assertEquals(new GomokuBoard(9, 9, "    HHHHH"),
-                ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_ONE_, 1, Color.HUMAN).getBestBoard());
+        Assert.assertEquals(new GomokuMove(4, 0, Color.HUMAN),
+                ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_ONE_, 1, Color.HUMAN).getMove());
     }
 
     @Test
     public void testGameOverInTwo() {
-        Assert.assertEquals(new GomokuBoard(9, 9, "    HHHH"),
-                ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO, 3, Color.HUMAN).getBestBoard());
+        Assert.assertEquals(new GomokuMove(4, 0, Color.HUMAN),
+                ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO, 3, Color.HUMAN).getMove());
     }
 
     @Test
     public void testGameOverInTwo2() {
         BestMove result = ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_2, 5, Color.COMPUTER);
-        Assert.assertEquals(new GomokuBoard(9, 9, "X       X", " X     X", "  X   X", "", "    X"), result.getBestBoard());
+        Assert.assertEquals(new GomokuMove(4, 4, Color.COMPUTER), result.getMove());
     }
 
     @Test
     public void testPreventGameOverInTwo() {
         BestMove result = ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_2, 4, Color.HUMAN);
-        Assert.assertEquals(new GomokuBoard(9, 9, "X       X", " X     X", "  X   X", "", "    H"), result.getBestBoard());
+        Assert.assertEquals(new GomokuMove(4, 4, Color.HUMAN), result.getMove());
     }
 
     @Test
