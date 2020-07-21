@@ -11,7 +11,7 @@ import com.vranec.minimax.Color;
  *
  */
 public class App {
-    private final ArtificialIntelligence ai = new ArtificialIntelligence();
+    private final ArtificialIntelligence<GomokuMove> ai = new ArtificialIntelligence<>();
     private GomokuBoard board = new GomokuBoard(9, 9);
     Scanner input = new Scanner(System.in);
 

@@ -14,7 +14,7 @@ import com.vranec.minimax.Board;
 import com.vranec.minimax.Color;
 import com.vranec.minimax.Move;
 
-public class GomokuBoard implements Board {
+public class GomokuBoard implements Board<GomokuMove> {
     private final Color[][] board;
     private int maxLineHuman;
     private int maxLineComputer;
@@ -201,8 +201,8 @@ public class GomokuBoard implements Board {
         }
     }
 
-    public Iterable<Move> getNextBoards(final Color color) {
-        Set<Move> possibleMoves = new LinkedHashSet<Move>();
+    public Iterable<GomokuMove> getNextBoards(final Color color) {
+        Set<GomokuMove> possibleMoves = new LinkedHashSet<>();
         if (board[board.length / 2][board[0].length / 2] == null) {
             possibleMoves.add(new GomokuMove(board.length / 2, board[0].length / 2, color));
         }
@@ -231,8 +231,7 @@ public class GomokuBoard implements Board {
         return possibleMoves;
     }
 
-    public Board apply(Move rawMove) {
-        GomokuMove move = (GomokuMove) rawMove;
+    public GomokuBoard apply(GomokuMove move) {
         board[move.getX()][move.getY()] = move.getColor();
         int maxLength = getMoveLength(move);
 
@@ -254,8 +253,7 @@ public class GomokuBoard implements Board {
         return this;
     }
 
-    public void undo(Move rawMove) {
-        GomokuMove move = (GomokuMove) rawMove;
+    public void undo(GomokuMove move) {
         board[move.getX()][move.getY()] = null;
         maxLineComputer = maxLineHuman = 0;
         if (move.getColor() == Color.HUMAN) {
@@ -268,6 +266,11 @@ public class GomokuBoard implements Board {
             computerTotalY -= move.getY();
         }
         movesSoFar.remove(move);
+    }
+
+    @Override
+    public long uniqueHashCode() {
+        return hashCode();
     }
 
     @Override
