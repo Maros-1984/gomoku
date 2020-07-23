@@ -3,16 +3,14 @@ package com.vranec.gomoku;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.vranec.minimax.Board;
 import com.vranec.minimax.Color;
-import com.vranec.minimax.Move;
 
 public class GomokuBoard implements Board<GomokuMove> {
     private final Color[][] board;
@@ -24,13 +22,24 @@ public class GomokuBoard implements Board<GomokuMove> {
     private int computerTotalX;
     private int computerTotalY;
     private int computerTotalCount;
-    private final Set<GomokuMove> movesSoFar = new HashSet<GomokuMove>();
 
     public GomokuBoard(int width, int height) {
         board = new Color[width][height];
         maxLineComputer = maxLineHuman = 0;
         humanTotalCount = humanTotalX = humanTotalY = 0;
         computerTotalCount = computerTotalX = computerTotalY = 0;
+    }
+
+    private GomokuBoard(GomokuBoard toBoCopied) {
+        this.board = Arrays.stream(toBoCopied.board).map(Color[]::clone).collect(Collectors.toList()).toArray(new Color[][]{});
+        this.maxLineHuman = toBoCopied.maxLineHuman;
+        this.maxLineComputer = toBoCopied.maxLineComputer;
+        this.humanTotalX = toBoCopied.humanTotalX;
+        this.humanTotalY = toBoCopied.humanTotalY;
+        this.humanTotalCount = toBoCopied.humanTotalCount;
+        this.computerTotalX = toBoCopied.computerTotalX;
+        this.computerTotalY = toBoCopied.computerTotalY;
+        this.computerTotalCount = toBoCopied.computerTotalCount;
     }
 
     private int getMoveLength(GomokuMove move) {
@@ -110,7 +119,7 @@ public class GomokuBoard implements Board<GomokuMove> {
     }
 
     public boolean isGameOver() {
-        return maxLineComputer >= 5 || maxLineComputer >= 5;
+        return maxLineComputer >= 5 || maxLineHuman >= 5;
     }
 
     public int getWidth() {
@@ -248,8 +257,6 @@ public class GomokuBoard implements Board<GomokuMove> {
             computerTotalY += move.getY();
         }
 
-        movesSoFar.add(move);
-
         return this;
     }
 
@@ -265,36 +272,20 @@ public class GomokuBoard implements Board<GomokuMove> {
             computerTotalX -= move.getX();
             computerTotalY -= move.getY();
         }
-        movesSoFar.remove(move);
     }
 
     @Override
-    public long uniqueHashCode() {
-        return hashCode();
+    public Object getTranspositionTableKey() {
+        return Arrays.deepHashCode(this.board);
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((movesSoFar == null) ? 0 : movesSoFar.hashCode());
-        return result;
+    public boolean isTranspositionTableUsed() {
+        return true;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        GomokuBoard other = (GomokuBoard) obj;
-        if (movesSoFar == null) {
-            if (other.movesSoFar != null)
-                return false;
-        } else if (!movesSoFar.equals(other.movesSoFar))
-            return false;
+    public boolean isNullHeuristicOn() {
         return true;
     }
 }

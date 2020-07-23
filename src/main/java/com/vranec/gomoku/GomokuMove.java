@@ -1,26 +1,13 @@
 package com.vranec.gomoku;
 
+import java.util.Objects;
 import java.util.Random;
 
 import com.vranec.minimax.Color;
 import com.vranec.minimax.Move;
 
 public class GomokuMove extends Position implements Move {
-    private static final int[][] HUMAN_HASH = new int[100][100];
-    private static final int[][] COMPUTER_HASH = new int[100][100];
-
-    static {
-        Random random = new Random();
-        for (int x = 0; x < HUMAN_HASH.length; x++) {
-            for (int y = 0; y < HUMAN_HASH[x].length; y++) {
-                HUMAN_HASH[x][y] = random.nextInt();
-                COMPUTER_HASH[x][y] = random.nextInt();
-            }
-        }
-    }
-
     private final Color color;
-    private final int hashCode;
 
     public GomokuMove(String moveString) {
         this(moveString.charAt(1) - '1', moveString.charAt(0) - 'a', Color.HUMAN);
@@ -29,7 +16,6 @@ public class GomokuMove extends Position implements Move {
     public GomokuMove(int x, int y, Color color) {
         super(x, y);
         this.color = color;
-        this.hashCode = (color == Color.HUMAN ? HUMAN_HASH[x][y] : COMPUTER_HASH[x][y]);
     }
 
     public Color getColor() {
@@ -38,7 +24,7 @@ public class GomokuMove extends Position implements Move {
 
     @Override
     public int hashCode() {
-        return hashCode;
+        return Objects.hash(super.hashCode(), color);
     }
 
     @Override
