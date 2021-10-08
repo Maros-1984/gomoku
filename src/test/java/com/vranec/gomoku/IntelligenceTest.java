@@ -1,11 +1,10 @@
 package com.vranec.gomoku;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.vranec.minimax.ArtificialIntelligence;
 import com.vranec.minimax.BestMove;
 import com.vranec.minimax.Color;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class IntelligenceTest {
     private static final GomokuBoard BOARD_GAME_OVER_IN_ONE_ = new GomokuBoard(9, 9, "     HHHH");
@@ -27,63 +26,63 @@ public class IntelligenceTest {
 
     @Test
     public void testGameOverInOne() {
-        Assert.assertEquals(new GomokuMove(4, 0, Color.HUMAN),
+        Assertions.assertEquals(new GomokuMove(4, 0, Color.HUMAN),
                 ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_ONE_, 1, Color.HUMAN).getMove());
     }
 
     @Test
     public void testGameOverInOne2_givenComputerOnTurn_preventsHumanWin() {
-        Assert.assertEquals(new GomokuMove(7, 0, Color.COMPUTER),
+        Assertions.assertEquals(new GomokuMove(7, 0, Color.COMPUTER),
                 ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_ONE_2, 2, Color.COMPUTER).getMove());
     }
 
     @Test
     public void testGameOverInOne2_givenHumanOnTurn_winsTheGame() {
-        Assert.assertEquals(new GomokuMove(7, 0, Color.HUMAN),
+        Assertions.assertEquals(new GomokuMove(7, 0, Color.HUMAN),
                 ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_ONE_2, 1, Color.HUMAN).getMove());
     }
 
     @Test
     public void testGameOverInOne3_givenComputerOnTurn_preventsHumanWin() {
-        Assert.assertEquals(new GomokuMove(7, 3, Color.COMPUTER),
+        Assertions.assertEquals(new GomokuMove(7, 3, Color.COMPUTER),
                 ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_ONE_3, 5, Color.COMPUTER).getMove());
     }
 
     @Test
     public void testGameOverInOne3_givenHumanOnTurn_winsTheGame() {
-        Assert.assertEquals(new GomokuMove(7, 3, Color.HUMAN),
+        Assertions.assertEquals(new GomokuMove(7, 3, Color.HUMAN),
                 ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_ONE_3, 1, Color.HUMAN).getMove());
     }
 
     @Test
     public void testGameOverInTwo3_givenComputerOnTurn_preventsHumanWin() {
-        Assert.assertEquals(new GomokuMove(1, 4, Color.COMPUTER),
+        Assertions.assertEquals(new GomokuMove(1, 4, Color.COMPUTER),
                 ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_3, 4, Color.COMPUTER)
                         .getMove());
     }
 
     @Test
     public void testGameOverInTwo3_givenHumanOnTurn_winsTheGame() {
-        Assert.assertEquals(new GomokuMove(1, 4, Color.HUMAN),
+        Assertions.assertEquals(new GomokuMove(1, 4, Color.HUMAN),
                 ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_3, 3, Color.HUMAN).getMove());
     }
 
     @Test
     public void testGameOverInTwo() {
-        Assert.assertEquals(new GomokuMove(4, 0, Color.HUMAN),
+        Assertions.assertEquals(new GomokuMove(4, 0, Color.HUMAN),
                 ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO, 3, Color.HUMAN).getMove());
     }
 
     @Test
     public void testGameOverInTwo2() {
         BestMove result = ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_2, 5, Color.COMPUTER);
-        Assert.assertEquals(new GomokuMove(4, 4, Color.COMPUTER), result.getMove());
+        Assertions.assertEquals(new GomokuMove(4, 4, Color.COMPUTER), result.getMove());
     }
 
     @Test
     public void testPreventGameOverInTwo() {
         BestMove result = ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_2, 4, Color.HUMAN);
-        Assert.assertEquals(new GomokuMove(4, 4, Color.HUMAN), result.getMove());
+        Assertions.assertEquals(new GomokuMove(4, 4, Color.HUMAN), result.getMove());
     }
 
     @Test
