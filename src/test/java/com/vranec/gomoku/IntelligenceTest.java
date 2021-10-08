@@ -22,7 +22,7 @@ public class IntelligenceTest {
     private static final GomokuBoard BOARD_GAME_OVER_IN_TWO_2 = new GomokuBoard(9, 9, "X       X", " X     X", "  X   X");
     private static final GomokuBoard BOARD_GAME_OVER_IN_TWO_3 = new GomokuBoard(9, 9, "", "    O",
             "   OOOX", "  O X", "   X X");
-    private ArtificialIntelligence<GomokuMove> ai = new ArtificialIntelligence<>();
+    private final ArtificialIntelligence<GomokuMove> ai = new ArtificialIntelligence<>();
 
     @Test
     public void testGameOverInOne() {
@@ -75,13 +75,13 @@ public class IntelligenceTest {
 
     @Test
     public void testGameOverInTwo2() {
-        BestMove result = ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_2, 5, Color.COMPUTER);
+        BestMove<GomokuMove> result = ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_2, 5, Color.COMPUTER);
         Assertions.assertEquals(new GomokuMove(4, 4, Color.COMPUTER), result.getMove());
     }
 
     @Test
     public void testPreventGameOverInTwo() {
-        BestMove result = ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_2, 4, Color.HUMAN);
+        BestMove<GomokuMove> result = ai.getBestMoveIterativeDeepening(BOARD_GAME_OVER_IN_TWO_2, 4, Color.HUMAN);
         Assertions.assertEquals(new GomokuMove(4, 4, Color.HUMAN), result.getMove());
     }
 
@@ -91,5 +91,29 @@ public class IntelligenceTest {
         int depth = 10;
         ai.getBestMoveIterativeDeepening(new GomokuBoard(10, 10), depth, Color.HUMAN);
         System.out.println("Searched in depth " + depth + " for " + (System.currentTimeMillis() - start) + "ms.");
+    }
+
+    @Test
+    public void ai_givenEmptyBoard_shouldStartNearTheMiddle() {
+        BestMove<GomokuMove> result = ai.getBestMoveIterativeDeepening(new GomokuBoard(9, 9), 4, Color.COMPUTER);
+        Assertions.assertEquals(new GomokuMove(4, 4, Color.COMPUTER), result.getMove());
+    }
+
+    @Test
+    public void ai_givenComputerIsSecondToMove_shouldStartNearTheMiddle() {
+        GomokuMove result = ai.getBestMoveIterativeDeepening(
+                new GomokuBoard(9, 9, "", "", "", "", "    O"), 5, Color.COMPUTER).getMove();
+
+        Assertions.assertTrue(Math.abs(result.getX() - 4) <= 1, "Sub-optimal move: " + result);
+        Assertions.assertTrue(Math.abs(result.getY() - 4) <= 1, "Sub-optimal move: " + result);
+    }
+
+    @Test
+    public void ai_givenComputerIsSecondToMove_shouldContinueNearTheMiddle() {
+        GomokuMove result = ai.getBestMoveIterativeDeepening(
+                new GomokuBoard(9, 9, "", "", "", "", "   O O"), 4, Color.COMPUTER).getMove();
+
+        Assertions.assertTrue(Math.abs(result.getX() - 4) <= 1);
+        Assertions.assertTrue(Math.abs(result.getY() - 4) <= 1);
     }
 }

@@ -1,16 +1,15 @@
 package com.vranec.gomoku;
 
+import com.vranec.minimax.Board;
+import com.vranec.minimax.Color;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.vranec.minimax.Board;
-import com.vranec.minimax.Color;
 
 public class GomokuBoard implements Board<GomokuMove> {
     private final Color[][] board;
@@ -76,30 +75,30 @@ public class GomokuBoard implements Board<GomokuMove> {
         for (int y = 0; y < lines.length; y++) {
             for (int x = 0; x < lines[y].length(); x++) {
                 switch (lines[y].charAt(x)) {
-                case 'o':
-                case 'O':
-                case 'h':
-                case 'H':
-                    board[x][y] = Color.HUMAN;
-                    GomokuMove move = new GomokuMove(x, y, Color.HUMAN);
-                    maxLineHuman = Math.max(maxLineHuman, getMoveLength(move));
-                    humanTotalCount++;
-                    humanTotalX += x;
-                    humanTotalY += y;
-                    break;
-                case 'x':
-                case 'X':
-                    board[x][y] = Color.COMPUTER;
-                    GomokuMove move2 = new GomokuMove(x, y, Color.COMPUTER);
-                    maxLineComputer = Math.max(maxLineComputer, getMoveLength(move2));
-                    computerTotalCount++;
-                    computerTotalX += x;
-                    computerTotalY += y;
-                    break;
-                case ' ':
-                    break;
-                default:
-                    throw new IllegalArgumentException();
+                    case 'o':
+                    case 'O':
+                    case 'h':
+                    case 'H':
+                        board[x][y] = Color.HUMAN;
+                        GomokuMove move = new GomokuMove(x, y, Color.HUMAN);
+                        maxLineHuman = Math.max(maxLineHuman, getMoveLength(move));
+                        humanTotalCount++;
+                        humanTotalX += x;
+                        humanTotalY += y;
+                        break;
+                    case 'x':
+                    case 'X':
+                        board[x][y] = Color.COMPUTER;
+                        GomokuMove move2 = new GomokuMove(x, y, Color.COMPUTER);
+                        maxLineComputer = Math.max(maxLineComputer, getMoveLength(move2));
+                        computerTotalCount++;
+                        computerTotalX += x;
+                        computerTotalY += y;
+                        break;
+                    case ' ':
+                        break;
+                    default:
+                        throw new IllegalArgumentException();
                 }
             }
         }
@@ -130,14 +129,15 @@ public class GomokuBoard implements Board<GomokuMove> {
         return board[0].length;
     }
 
+    @Override
     public int getBoardValue(Color color) {
         switch (color) {
-        case COMPUTER:
-            return -getHumanBoardValue();
-        case HUMAN:
-            return getHumanBoardValue();
-        default:
-            throw new IllegalStateException();
+            case COMPUTER:
+                return -getHumanBoardValue();
+            case HUMAN:
+                return getHumanBoardValue();
+            default:
+                throw new IllegalStateException();
         }
     }
 
@@ -201,12 +201,12 @@ public class GomokuBoard implements Board<GomokuMove> {
             return " ";
         }
         switch (color) {
-        case COMPUTER:
-            return "X";
-        case HUMAN:
-            return "O";
-        default:
-            throw new IllegalStateException();
+            case COMPUTER:
+                return "X";
+            case HUMAN:
+                return "O";
+            default:
+                throw new IllegalStateException();
         }
     }
 

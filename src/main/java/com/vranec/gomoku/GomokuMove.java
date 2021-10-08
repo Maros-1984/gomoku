@@ -36,9 +36,7 @@ public class GomokuMove extends Position implements Move {
         if (getClass() != obj.getClass())
             return false;
         GomokuMove other = (GomokuMove) obj;
-        if (color != other.color)
-            return false;
-        return true;
+        return color == other.color;
     }
 
     @Override
